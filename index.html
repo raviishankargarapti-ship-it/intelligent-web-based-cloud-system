@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CloudCore — Intelligent Web-Based Cloud System</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-dot"></span>
+    <span class="logo-text">CLOUDCORE</span>
+    <span class="ai-badge">AI</span>
+  </div>
+
+  <nav class="nav-menu">
+    <div class="nav-section">OVERVIEW</div>
+    <a class="nav-item active" data-page="dashboard" onclick="navigate(this)">
+      <i class="ti ti-layout-dashboard"></i> Dashboard
+    </a>
+    <a class="nav-item" data-page="analytics" onclick="navigate(this)">
+      <i class="ti ti-chart-bar"></i> Analytics
+    </a>
+    <a class="nav-item" data-page="alerts" onclick="navigate(this)">
+      <i class="ti ti-bell"></i> Alerts
+      <span class="badge-count">2</span>
+    </a>
+
+    <div class="nav-section">INFRASTRUCTURE</div>
+    <a class="nav-item" data-page="compute" onclick="navigate(this)">
+      <i class="ti ti-server"></i> Compute
+    </a>
+    <a class="nav-item" data-page="storage" onclick="navigate(this)">
+      <i class="ti ti-database"></i> Storage
+    </a>
+    <a class="nav-item" data-page="networking" onclick="navigate(this)">
+      <i class="ti ti-network"></i> Networking
+    </a>
+    <a class="nav-item" data-page="security" onclick="navigate(this)">
+      <i class="ti ti-shield"></i> Security
+    </a>
+
+    <div class="nav-section">AI ENGINE</div>
+    <a class="nav-item" data-page="predictions" onclick="navigate(this)">
+      <i class="ti ti-brain"></i> Predictions
+    </a>
+    <a class="nav-item" data-page="autoscale" onclick="navigate(this)">
+      <i class="ti ti-adjustments"></i> Auto-Scaling
+    </a>
+    <a class="nav-item" data-page="settings" onclick="navigate(this)">
+      <i class="ti ti-settings"></i> Settings
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="uptime-row">
+      <span class="dot-green"></span>
+      <span>System Uptime: <strong>99.97%</strong></span>
+    </div>
+    <div class="version-row">v3.8.1 · AI Layer Active</div>
+  </div>
+</aside>
+
+<!-- ===== MAIN WRAPPER ===== -->
+<div class="wrapper" id="wrapper">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+      <i class="ti ti-menu-2"></i>
+    </button>
+    <div class="topbar-title" id="page-title">Dashboard</div>
+    <div class="topbar-right">
+      <span class="status-pill" id="status-pill">● ALL SYSTEMS OPERATIONAL</span>
+      <button class="btn-icon" onclick="refreshAll()" title="Refresh">
+        <i class="ti ti-refresh"></i>
+      </button>
+      <button class="btn-icon" onclick="toggleTheme()" title="Toggle theme" id="theme-btn">
+        <i class="ti ti-sun"></i>
+      </button>
+      <div class="user-avatar" title="Admin">A</div>
+    </div>
+  </header>
+
+  <!-- PAGE CONTAINER -->
+  <main class="page-container" id="page-container">
+
+    <!-- ===== PAGE: DASHBOARD ===== -->
+    <section class="page active" id="page-dashboard">
+
+      <!-- Alert Strip -->
+      <div class="alert-strip" id="alert-strip">
+        <i class="ti ti-alert-triangle"></i>
+        <span>AI anomaly detected: Node <strong>AP-EAST-3</strong> latency +42ms above baseline — auto-remediation queued</span>
+        <button class="btn-sm" onclick="dismissAlert()">DISMISS</button>
+      </div>
+
+      <!-- KPI Row -->
+      <div class="grid-4">
+        <div class="card kpi-card animate-in" style="--d:.05s">
+          <div class="kpi-label">Active Nodes</div>
+          <div class="kpi-value" style="color:var(--green)" id="kpi-nodes">48</div>
+          <div class="kpi-sub"><span class="up">▲ +3</span> since last cycle</div>
+          <canvas class="sparkline" id="sp1"></canvas>
+        </div>
+        <div class="card kpi-card animate-in" style="--d:.10s">
+          <div class="kpi-label">Requests / sec</div>
+          <div class="kpi-value" style="color:var(--cyan)" id="kpi-rps">12,840</div>
+          <div class="kpi-sub"><span class="up">▲ 8.2%</span> vs last hour</div>
+          <canvas class="sparkline" id="sp2"></canvas>
+        </div>
+        <div class="card kpi-card animate-in" style="--d:.15s">
+          <div class="kpi-label">Avg Latency</div>
+          <div class="kpi-value" style="color:var(--amber)" id="kpi-lat">34ms</div>
+          <div class="kpi-sub"><span class="down">▼ +4ms</span> anomaly detected</div>
+          <canvas class="sparkline" id="sp3"></canvas>
+        </div>
+        <div class="card kpi-card animate-in" style="--d:.20s">
+          <div class="kpi-label">Error Rate</div>
+          <div class="kpi-value" style="color:var(--green)" id="kpi-err">0.03%</div>
+          <div class="kpi-sub"><span class="up">● healthy</span> p99 &lt; 1%</div>
+          <canvas class="sparkline" id="sp4"></canvas>
+        </div>
+      </div>
+
+      <!-- Resource Gauges -->
+      <div class="grid-3">
+        <div class="card animate-in" style="--d:.25s">
+          <div class="card-title">CPU USAGE</div>
+          <div class="gauge-row">
+            <div class="gauge" id="gauge-cpu" data-value="70" data-color="#00e5ff"></div>
+            <div class="gauge-info">
+              <div class="kpi-label">Cluster Avg</div>
+              <div class="gauge-num" style="color:var(--cyan)">70%</div>
+              <div class="kpi-sub">12 cores · 3.2 GHz</div>
+            </div>
+          </div>
+        </div>
+        <div class="card animate-in" style="--d:.30s">
+          <div class="card-title">MEMORY</div>
+          <div class="gauge-row">
+            <div class="gauge" id="gauge-mem" data-value="60" data-color="#7c3aff"></div>
+            <div class="gauge-info">
+              <div class="kpi-label">Cluster Avg</div>
+              <div class="gauge-num" style="color:var(--purple)">60%</div>
+              <div class="kpi-sub">512 GB total pool</div>
+            </div>
+          </div>
+        </div>
+        <div class="card animate-in" style="--d:.35s">
+          <div class="card-title">DISK I/O</div>
+          <div class="gauge-row">
+            <div class="gauge" id="gauge-disk" data-value="30" data-color="#00ff88"></div>
+            <div class="gauge-info">
+              <div class="kpi-label">Throughput</div>
+              <div class="gauge-num" style="color:var(--green)">30%</div>
+              <div class="kpi-sub">14.2 GB/s burst</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nodes + Traffic -->
+      <div class="grid-2-1">
+        <div class="card animate-in" style="--d:.40s">
+          <div class="card-title">NODE CLUSTER STATUS
+            <span class="card-action" onclick="navigate(document.querySelector('[data-page=compute]'))">view all →</span>
+          </div>
+          <div class="node-list" id="node-list"></div>
+        </div>
+        <div class="card animate-in" style="--d:.45s">
+          <div class="card-title">TRAFFIC LOAD — 24H</div>
+          <div class="traffic-bars" id="traffic-bars"></div>
+          <div class="traffic-labels">
+            <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span>
+          </div>
+          <div class="traffic-stats">
+            <div><div class="kpi-label">Peak RPS</div><div class="traffic-stat-val" style="color:var(--cyan)">18.4K</div></div>
+            <div><div class="kpi-label">Avg RPS</div><div class="traffic-stat-val">9.2K</div></div>
+            <div><div class="kpi-label">Bandwidth</div><div class="traffic-stat-val" style="color:var(--green)">4.8 TB</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Event Log -->
+      <div class="card animate-in" style="--d:.50s">
+        <div class="card-title">SYSTEM EVENT LOG
+          <span class="card-action" onclick="clearLogs()">clear →</span>
+        </div>
+        <div class="log-list" id="log-list"></div>
+      </div>
+    </section>
+
+    <!-- ===== PAGE: ANALYTICS ===== -->
+    <section class="page" id="page-analytics">
+      <div class="page-hero">
+        <h2>Analytics</h2>
+        <p>Historical performance metrics across your cloud infrastructure.</p>
+      </div>
+      <div class="grid-4">
+        <div class="card kpi-card"><div class="kpi-label">Total Requests (30d)</div><div class="kpi-value" style="color:var(--cyan)">3.2B</div></div>
+        <div class="card kpi-card"><div class="kpi-label">Avg Response Time</div><div class="kpi-value" style="color:var(--green)">28ms</div></div>
+        <div class="card kpi-card"><div class="kpi-label">Data Transferred</div><div class="kpi-value" style="color:var(--purple)">148 TB</div></div>
+        <div class="card kpi-card"><div class="kpi-label">AI Interventions</div><div class="kpi-value" style="color:var(--amber)">1,240</div></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">REQUEST VOLUME — LAST 30 DAYS</div>
+        <canvas id="chart-analytics" height="80"></canvas>
+      </div>
+      <div class="grid-3" style="margin-top:16px">
+        <div class="card"><div class="card-title">TOP REGIONS</div><div class="region-list" id="region-list"></div></div>
+        <div class="card"><div class="card-title">ERROR BREAKDOWN</div><div class="error-breakdown" id="error-breakdown"></div></div>
+        <div class="card"><div class="card-title">AI INSIGHTS</div><div class="ai-insights" id="ai-insights"></div></div>
+      </div>
+    </section>
+
+    <!-- ===== PAGE: ALERTS ===== -->
+    <section class="page" id="page-alerts">
+      <div class="page-hero">
+        <h2>Alerts</h2>
+        <p>Active and historical system alerts with AI-powered severity classification.</p>
+      </div>
+      <div class="alerts-list" id="alerts-list"></div>
+    </section>
+
+    <!-- ===== PAGE: COMPUTE ===== -->
+    <section class="page" id="page-compute">
+      <div class="page-hero">
+        <h2>Compute</h2>
+        <p>All active nodes, their health, and resource utilisation across regions.</p>
+      </div>
+      <div class="compute-grid" id="compute-grid"></div>
+    </section>
+
+    <!-- ===== PAGE: STORAGE ===== -->
+    <section class="page" id="page-storage">
+      <div class="page-hero">
+        <h2>Storage</h2>
+        <p>Distributed object storage, block volumes, and database clusters.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card"><div class="card-title">OBJECT STORE</div><div class="storage-stat"><span class="big-stat" style="color:var(--cyan)">148 TB</span><span class="kpi-sub">used of 500 TB</span></div><div class="stor-bar"><div class="stor-fill" style="width:29.6%;background:var(--cyan)"></div></div></div>
+        <div class="card"><div class="card-title">BLOCK VOLUMES</div><div class="storage-stat"><span class="big-stat" style="color:var(--purple)">62 TB</span><span class="kpi-sub">used of 200 TB</span></div><div class="stor-bar"><div class="stor-fill" style="width:31%;background:var(--purple)"></div></div></div>
+        <div class="card"><div class="card-title">DATABASE CLUSTERS</div><div class="storage-stat"><span class="big-stat" style="color:var(--green)">18 TB</span><span class="kpi-sub">used of 100 TB</span></div><div class="stor-bar"><div class="stor-fill" style="width:18%;background:var(--green)"></div></div></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">STORAGE NODES</div>
+        <div class="table-wrap"><table class="data-table" id="storage-table"></table></div>
+      </div>
+    </section>
+
+    <!-- ===== PAGE: NETWORKING ===== -->
+    <section class="page" id="page-networking">
+      <div class="page-hero">
+        <h2>Networking</h2>
+        <p>Global traffic routing, CDN edge points, and VPC configurations.</p>
+      </div>
+      <div class="grid-4">
+        <div class="card kpi-card"><div class="kpi-label">Edge Nodes</div><div class="kpi-value" style="color:var(--cyan)">320</div></div>
+        <div class="card kpi-card"><div class="kpi-label">CDN Hit Rate</div><div class="kpi-value" style="color:var(--green)">94.2%</div></div>
+        <div class="card kpi-card"><div class="kpi-label">Avg Throughput</div><div class="kpi-value" style="color:var(--purple)">4.8 Gbps</div></div>
+        <div class="card kpi-card"><div class="kpi-label">Packet Loss</div><div class="kpi-value" style="color:var(--amber)">0.001%</div></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">NETWORK TOPOLOGY</div>
+        <div class="network-diagram" id="network-diagram"></div>
+      </div>
+    </section>
+
+    <!-- ===== PAGE: SECURITY ===== -->
+    <section class="page" id="page-security">
+      <div class="page-hero">
+        <h2>Security</h2>
+        <p>Threat detection, firewall rules, and compliance status.</p>
+      </div>
+      <div class="grid-4">
+        <div class="card kpi-card"><div class="kpi-label">Threats Blocked</div><div class="kpi-value" style="color:var(--green)">14,820</div><div class="kpi-sub"><span class="up">▲ today</span></div></div>
+        <div class="card kpi-card"><div class="kpi-label">Active Firewalls</div><div class="kpi-value" style="color:var(--cyan)">48</div></div>
+        <div class="card kpi-card"><div class="kpi-label">SSL Certificates</div><div class="kpi-value" style="color:var(--green)">Valid</div><div class="kpi-sub">Renews in 84d</div></div>
+        <div class="card kpi-card"><div class="kpi-label">Compliance Score</div><div class="kpi-value" style="color:var(--green)">98/100</div></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">THREAT LOG</div>
+        <div class="log-list" id="threat-log"></div>
+      </div>
+    </section>
+
+    <!-- ===== PAGE: PREDICTIONS ===== -->
+    <section class="page" id="page-predictions">
+      <div class="page-hero">
+        <h2>AI Predictions</h2>
+        <p>Machine learning models predicting traffic spikes, failures, and cost savings.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card ai-card">
+          <div class="ai-icon"><i class="ti ti-chart-line"></i></div>
+          <div class="card-title">TRAFFIC FORECAST</div>
+          <p class="ai-desc">Model predicts <strong>+23% spike</strong> at 19:00 UTC based on 90-day historical patterns. Confidence: 91%.</p>
+          <div class="confidence-bar"><div class="conf-fill" style="width:91%;background:var(--cyan)"></div></div>
+        </div>
+        <div class="card ai-card">
+          <div class="ai-icon"><i class="ti ti-alert-circle"></i></div>
+          <div class="card-title">FAILURE PREDICTION</div>
+          <p class="ai-desc">AP-EAST-3 has <strong>74% probability</strong> of requiring restart within 6h. Preventive action recommended.</p>
+          <div class="confidence-bar"><div class="conf-fill" style="width:74%;background:var(--amber)"></div></div>
+        </div>
+        <div class="card ai-card">
+          <div class="ai-icon"><i class="ti ti-coin"></i></div>
+          <div class="card-title">COST OPTIMISATION</div>
+          <p class="ai-desc">Rightsizing 6 over-provisioned nodes could save <strong>$4,200/month</strong>. Confidence: 88%.</p>
+          <div class="confidence-bar"><div class="conf-fill" style="width:88%;background:var(--green)"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PAGE: AUTO-SCALING ===== -->
+    <section class="page" id="page-autoscale">
+      <div class="page-hero">
+        <h2>Auto-Scaling</h2>
+        <p>Intelligent scaling policies powered by predictive AI and real-time demand signals.</p>
+      </div>
+      <div class="grid-3">
+        <div class="card kpi-card"><div class="kpi-label">Scale-Up Events (24h)</div><div class="kpi-value" style="color:var(--green)">12</div></div>
+        <div class="card kpi-card"><div class="kpi-label">Scale-Down Events (24h)</div><div class="kpi-value" style="color:var(--cyan)">7</div></div>
+        <div class="card kpi-card"><div class="kpi-label">Nodes Added Today</div><div class="kpi-value" style="color:var(--purple)">+8</div></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">SCALING POLICY</div>
+        <div class="policy-form">
+          <div class="policy-row">
+            <label>Scale-Up Threshold (CPU %)</label>
+            <input type="range" min="50" max="95" value="75" id="scale-up-thresh" oninput="document.getElementById('su-val').textContent=this.value+'%'"/>
+            <span id="su-val">75%</span>
+          </div>
+          <div class="policy-row">
+            <label>Scale-Down Threshold (CPU %)</label>
+            <input type="range" min="10" max="60" value="30" id="scale-dn-thresh" oninput="document.getElementById('sd-val').textContent=this.value+'%'"/>
+            <span id="sd-val">30%</span>
+          </div>
+          <div class="policy-row">
+            <label>Min Nodes</label>
+            <input type="number" min="1" max="20" value="4" class="num-input"/>
+          </div>
+          <div class="policy-row">
+            <label>Max Nodes</label>
+            <input type="number" min="10" max="200" value="80" class="num-input"/>
+          </div>
+          <button class="btn-primary" onclick="alert('Policy saved!')">SAVE POLICY</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PAGE: SETTINGS ===== -->
+    <section class="page" id="page-settings">
+      <div class="page-hero">
+        <h2>Settings</h2>
+        <p>System configuration, notifications, and integration settings.</p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">GENERAL</div>
+          <div class="settings-list">
+            <div class="setting-row"><span>AI Engine</span><label class="toggle"><input type="checkbox" checked/><span class="slider-track"></span></label></div>
+            <div class="setting-row"><span>Auto-Remediation</span><label class="toggle"><input type="checkbox" checked/><span class="slider-track"></span></label></div>
+            <div class="setting-row"><span>Predictive Scaling</span><label class="toggle"><input type="checkbox" checked/><span class="slider-track"></span></label></div>
+            <div class="setting-row"><span>Dark Mode</span><label class="toggle"><input type="checkbox" id="dark-mode-toggle" onchange="toggleTheme()"/><span class="slider-track"></span></label></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">NOTIFICATIONS</div>
+          <div class="settings-list">
+            <div class="setting-row"><span>Email Alerts</span><label class="toggle"><input type="checkbox" checked/><span class="slider-track"></span></label></div>
+            <div class="setting-row"><span>Slack Webhooks</span><label class="toggle"><input type="checkbox"/><span class="slider-track"></span></label></div>
+            <div class="setting-row"><span>PagerDuty</span><label class="toggle"><input type="checkbox" checked/><span class="slider-track"></span></label></div>
+            <div class="setting-row"><span>SMS Alerts</span><label class="toggle"><input type="checkbox"/><span class="slider-track"></span></label></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
